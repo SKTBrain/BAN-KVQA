@@ -29,7 +29,7 @@ def compute_score_with_logits(logits, labels):
 def compute_zcore_with_logits(logits, labels):
     logits = torch.sigmoid(logits).data.round().byte()
     labels = labels.byte()
-    scores = ~logits ^ labels # and operator
+    scores = 1 - (logits ^ labels)
     return scores
 
 
@@ -41,7 +41,7 @@ def train(model, train_loader, eval_loader, num_epochs, output, opt=None, s_epoc
     gradual_warmup_steps = [0.5 * lr_default, 1.0 * lr_default, 1.5 * lr_default, 2.0 * lr_default]
     saving_epoch = 3
     grad_clip = .25
-    dset = train_loader.dataset.dataset
+    dset = train_loader.dataset
 
     utils.create_dir(output)
     optim = torch.optim.Adamax(filter(lambda p: p.requires_grad, model.parameters()), lr=lr_default) \
@@ -145,7 +145,7 @@ def evaluate(model, dataloader):
     zcore = 0
     upper_bound = 0
     num_data = 0
-    dset = dataloader.dataset.dataset
+    dset = dataloader.dataset
     n_answer_type = torch.zeros(len(dset.idx2type))
     score_answer_type = torch.zeros(len(dset.idx2type))
     entropy = None

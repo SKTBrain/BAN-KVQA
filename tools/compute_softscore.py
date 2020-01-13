@@ -165,9 +165,17 @@ def get_question(qid, questions):
 
 if __name__ == '__main__':
     dataroot = 'data'
-    answer_file = os.path.join(dataroot, 'KVQA_annotations.json')
-    answers = json.load(open(answer_file, encoding='utf-8'))
+    answer_file = os.path.join(dataroot, 'KVQA_annotations_train.json')
+    with open(answer_file, encoding='utf-8') as f:
+        train_answers = json.load(f)
 
-    occurence = filter_answers(answers, 1)
+    answer_file = os.path.join(dataroot, 'KVQA_annotations_val.json')
+    with open(answer_file, encoding='utf-8') as f:
+        val_answers = json.load(f)
+
+    answers = train_answers + val_answers
+
+    occurence = filter_answers(answers, 3)
     ans2label = create_ans2label(occurence, 'trainval')
-    compute_target(answers, ans2label, 'train')
+    compute_target(train_answers, ans2label, 'train')
+    compute_target(val_answers, ans2label, 'val')

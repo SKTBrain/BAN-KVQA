@@ -122,7 +122,7 @@ def _load_kvqa(dataroot, name, img_id2val, label2ans, drop_img_inds=[]):
     name: 'train', 'val', 'test'
     """
     question_path = os.path.join(
-        os.path.join(dataroot, 'KVQA_annotations.json'))
+        os.path.join(dataroot, 'KVQA_annotations_%s.json' % name))
     questions = sorted(json.load(open(question_path, encoding='utf-8')), key=lambda x: x['image'])
     idx2type = None
     type2idx = None
@@ -170,7 +170,7 @@ def _load_kvqa(dataroot, name, img_id2val, label2ans, drop_img_inds=[]):
 class KvqaFeatureDataset(Dataset):
     def __init__(self, split, dictionary, dataroot='data', tokenizer='sp', drop_zero_detection=True):
         super(KvqaFeatureDataset, self).__init__()
-        assert split in ['train']
+        assert split in ['train', 'val', 'test']
         self.dataroot = dataroot
 
         ans2label_path = os.path.join(dataroot, 'cache', 'trainval_ans2label.kvqa.pkl')

@@ -20,7 +20,9 @@ def create_dictionary(dataroot, tk='mecab'):
     elif tk == 'kkma':
         tokenizer = Kkma()
     files = [
-        'KVQA_annotations.json',
+        'KVQA_annotations_train.json',
+        'KVQA_annotations_val.json',
+        'KVQA_annotations_test.json'
     ]
     for path in files:
         question_path = os.path.join(dataroot, path)

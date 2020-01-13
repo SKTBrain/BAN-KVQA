@@ -23,6 +23,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import base64
 import csv
 import re
+import json
 import h5py
 import _pickle as cPickle
 import numpy as np
@@ -39,21 +40,35 @@ def parse_args():
 
 def extract(split, infiles):
     FIELDNAMES = ['image_id', 'image_w', 'image_h', 'num_boxes', 'boxes', 'features']
+    question_file = {
+        'train': 'data/KVQA_annotations_train.json',
+        'val': 'data/KVQA_annotations_val.json',
+        'test': 'data/KVQA_annotations_test.json'
+    }
     data_file = {
-        'train': 'data/train_kvqa.hdf5'}
+        'train': 'data/train_kvqa.hdf5',
+        'val': 'data/val_kvqa.hdf5',
+        'test': 'data/test_kvqa.hdf5'}
     indices_file = {
-        'train': 'data/train_imgid2idx.kvqa.pkl'}
+        'train': 'data/train_imgid2idx.kvqa.pkl',
+        'val': 'data/val_imgid2idx.kvqa.pkl',
+        'test':'data/test_imgid2idx.kvqa.pkl'}
     known_num_boxes = {
-        'train': None
+        'train': 1107790,
+        'val': 186135,
+        'test': 560211
     }
     feature_length = 2048
     min_fixed_boxes = 10
     max_fixed_boxes = 100
 
+    with open(question_file[split]) as f:
+        questions = json.load(f)
+    split_imids = [os.path.splitext(q['image'])[0] for q in questions]
+
     h = h5py.File(data_file[split], 'w')
 
     if known_num_boxes[split] is None:
-        num_images = 0
         num_boxes = 0
         for infile in infiles:
             print("reading tsv...%s" % infile)
@@ -62,8 +77,8 @@ def extract(split, infiles):
                 for item in reader:
                     item['num_boxes'] = int(item['num_boxes'])
                     image_id, _ = os.path.splitext(item['image_id'])
-                    num_boxes += item['num_boxes']
-                    num_images += 1
+                    if image_id in split_imids:
+                        num_boxes += item['num_boxes']
     else:
         num_boxes = known_num_boxes[split]
 
@@ -76,7 +91,7 @@ def extract(split, infiles):
     spatial_img_features = h.create_dataset(
         'spatial_features', (num_boxes, 6), 'f')
     pos_boxes = h.create_dataset(
-        'pos_boxes', (num_images, 2), dtype='int32')
+        'pos_boxes', (len(split_imids), 2), dtype='int32')
 
     counter = 0
     num_boxes = 0
@@ -87,6 +102,9 @@ def extract(split, infiles):
         with open(infile, "r+") as tsv_in_file:
             reader = csv.DictReader(tsv_in_file, delimiter='\t', fieldnames=FIELDNAMES)
             for item in reader:
+                image_id, _ = os.path.splitext(item['image_id'])
+                if image_id not in split_imids:
+                    continue
                 item['num_boxes'] = int(item['num_boxes'])
                 item['boxes'] = bytes(item['boxes'], 'utf')
                 item['features'] = bytes(item['features'], 'utf')
@@ -144,6 +162,5 @@ if __name__ == '__main__':
     infiles.append(os.path.join(args.dataroot, 'KVQA_resnet101_faster_rcnn_genome.tsv'))
     infiles.append(os.path.join(args.dataroot, 'VizWiz_resnet101_faster_rcnn_genome.tsv'))
     extract('train', infiles)
-
-
-    
+    extract('val', infiles)
+    extract('test', infiles)
