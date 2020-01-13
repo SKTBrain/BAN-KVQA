@@ -33,7 +33,6 @@ def parse_args():
     parser.add_argument('--output', type=str, default='saved_models/ban-kvqa')
     parser.add_argument('--batch_size', type=int, default=64)
     parser.add_argument('--seed', type=int, default=1204, help='random seed')
-    parser.add_argument('--num_cv', type=int, default=5)
     args = parser.parse_args()
     return args
 

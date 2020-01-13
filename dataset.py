@@ -147,8 +147,6 @@ def _load_kvqa(dataroot, name, img_id2val, label2ans, drop_img_inds=[]):
                     continue
                 entry = _create_entry(image_index, question, answer)
                 entry['answerable'] = int(question['answerable'])
-                if question['answer_type'] == '네/아니요':
-                    question['answer_type'] = 'yes/no'
                 if question['answer_type'] not in type2idx:
                     type2idx[question['answer_type']] = len(idx2type)
                     idx2type.append(question['answer_type'])
@@ -157,7 +155,7 @@ def _load_kvqa(dataroot, name, img_id2val, label2ans, drop_img_inds=[]):
     else: # test
         entries = []
         for question in questions:
-            img_id = int(question['image'].split('.')[0].split('_')[-1])
+            img_id, _ = os.path.splitext(question['image'])
             q_id = img_id
             if not COUNTING_ONLY or is_howmany(question['question'], None, None):
                 question['question_id'] = q_id
