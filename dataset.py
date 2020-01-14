@@ -6,8 +6,6 @@ from __future__ import print_function
 import _pickle as cPickle
 import os
 import json
-import itertools
-import re
 import warnings
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore",category=FutureWarning)
@@ -20,30 +18,6 @@ from konlpy.tag import Mecab, Kkma
 from pytorch_pretrained_bert import BertTokenizer
 
 import utils
-
-
-COUNTING_ONLY = False
-
-# Following Trott et al. (ICLR 2018)
-#   Interpretable Counting for Visual Question Answering
-def is_howmany(q, a, label2ans):
-    if 'how many' in q.lower() or \
-       ('number of' in q.lower() and 'number of the' not in q.lower()) or \
-       'amount of' in q.lower() or \
-       'count of' in q.lower():
-        if a is None or answer_filter(a, label2ans):
-            return True
-        else:
-            return False
-    else:
-        return False
-
-
-def answer_filter(answers, label2ans, max_num=10):
-    for ans in answers['labels']:
-        if label2ans[ans].isdigit() and max_num >= int(label2ans[ans]):
-            return True
-    return False
 
 
 class Dictionary(object):
@@ -114,7 +88,7 @@ def _create_entry(img, question, answer):
     return entry
 
 
-def _load_kvqa(dataroot, name, img_id2val, label2ans, drop_img_inds=[]):
+def _load_kvqa(dataroot, name, img_id2val):
     """Load entries
 
     img_id2val: dict {img_id -> val} val can be used to retrieve image or features
@@ -141,32 +115,28 @@ def _load_kvqa(dataroot, name, img_id2val, label2ans, drop_img_inds=[]):
             question['image_id'] = q_id
             utils.assert_eq(q_id, answer['question_id'])
             img_id = q_id
-            if not COUNTING_ONLY or is_howmany(question['question'], answer, label2ans):
-                image_index = img_id2val[img_id]
-                if image_index in drop_img_inds:
-                    continue
-                entry = _create_entry(image_index, question, answer)
-                entry['answerable'] = int(question['answerable'])
-                if question['answer_type'] not in type2idx:
-                    type2idx[question['answer_type']] = len(idx2type)
-                    idx2type.append(question['answer_type'])
-                entry['answer_type'] = type2idx[question['answer_type']]
-                entries.append(entry)
+            image_index = img_id2val[img_id]
+            entry = _create_entry(image_index, question, answer)
+            entry['answerable'] = int(question['answerable'])
+            if question['answer_type'] not in type2idx:
+                type2idx[question['answer_type']] = len(idx2type)
+                idx2type.append(question['answer_type'])
+            entry['answer_type'] = type2idx[question['answer_type']]
+            entries.append(entry)
     else: # test
         entries = []
         for question in questions:
             img_id, _ = os.path.splitext(question['image'])
             q_id = img_id
-            if not COUNTING_ONLY or is_howmany(question['question'], None, None):
-                question['question_id'] = q_id
-                question['image_id'] = q_id
-                entry = _create_entry(img_id2val[img_id], question, None)
-                entries.append(entry)
+            question['question_id'] = q_id
+            question['image_id'] = q_id
+            entry = _create_entry(img_id2val[img_id], question, None)
+            entries.append(entry)
     return entries, type2idx, idx2type
 
 
 class KvqaFeatureDataset(Dataset):
-    def __init__(self, split, dictionary, dataroot='data', tokenizer='sp', drop_zero_detection=True):
+    def __init__(self, split, dictionary, dataroot='data', tokenizer='sp'):
         super(KvqaFeatureDataset, self).__init__()
         assert split in ['train', 'val', 'test']
         self.dataroot = dataroot
@@ -191,11 +161,7 @@ class KvqaFeatureDataset(Dataset):
             self.spatials = np.array(hf.get('spatial_features'))
             self.pos_boxes = np.array(hf.get('pos_boxes'))
 
-        if drop_zero_detection:
-            num_boxes = self.pos_boxes[:, 1] - self.pos_boxes[:, 0]
-            drop_img_inds = np.where(num_boxes == 0)[0]
-
-        self.entries, self.type2idx, self.idx2type = _load_kvqa(dataroot, split, self.img_id2idx, self.label2ans, drop_img_inds)
+        self.entries, self.type2idx, self.idx2type = _load_kvqa(dataroot, split, self.img_id2idx)
 
         if tokenizer == 'sp':
             self.tokenizer = BertTokenizer.from_pretrained('bert-base-multilingual-cased', do_lower_case=False)

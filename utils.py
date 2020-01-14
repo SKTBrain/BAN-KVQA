@@ -8,15 +8,12 @@ import errno
 import os
 import re
 import collections
-from random import shuffle
 import numpy as np
 import operator
 import functools
 import torch
-import torch.nn as nn
 import torch.nn.functional as F
 from torch._six import string_classes
-from torch.utils.data import Subset
 from torch.utils.data.dataloader import default_collate
 
 
@@ -159,23 +156,3 @@ class Logger(object):
         self.log_file.flush()
         print(msg)
 
-
-def gen_cv_dataset(dataset, num_cv, num_val):
-    num_dataset = len(dataset)
-    indices = list(range(num_dataset))
-
-    shuffle(indices)
-
-    start_idx = 0
-    end_idx = num_val
-    for i in range(num_cv):
-        val_indices = indices[start_idx:end_idx]
-        train_indices = [i for i in indices if i not in val_indices ]
-
-        start_idx += num_val
-        end_idx += num_val
-
-        train_dataset = Subset(dataset, train_indices)
-        val_dataset = Subset(dataset, val_indices)
-
-        yield train_dataset, val_dataset
