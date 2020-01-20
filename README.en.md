@@ -8,14 +8,14 @@ This repository is an implementation of [Bilinear Attention Networks](http://arx
 ![Examples of KVQA](docs/assets/img/kvqa_examples.png)
 ![Overview of bilinear attention networks](docs/assets/img/ban_overview.png)
 
-The 5-fold cross-validation scores are shown as follows:
+The validation scores repeated 5 times are shown as follows:
 
 | Embedding | Dimension |          All          |  Yes/No   |  Number   |   Other   | Unanswerable |
 | --------- | :-------: | :-------------------: | :-------: | :-------: | :-------: | :----------: |
-| [Word2vec](https://arxiv.org/abs/1310.4546)  | [200](https://github.com/Kyubyong/wordvectors)       |   37.23 ± 0.11    | **66.95** |   20.47   |   20.08   |  **93.57**   |
-| [GloVe](https://nlp.stanford.edu/projects/glove/)     | [100](https://ratsgo.github.io/embedding)       |   37.91 ± 0.08    |   65.98   |   20.76   |   21.97   |    93.18     |
-| [fastText](https://arxiv.org/abs/1607.04606)  | [200](https://github.com/Kyubyong/wordvectors)       | **38.16 ± 0.13**  |   66.05   | **20.79** | **22.45** |    92.72     |
-| [BERT](https://arxiv.org/abs/1810.04805)      | [768](https://github.com/google-research/bert)       | 37.95  ± 0.10 |   63.77   |   20.46   |   22.35   |    92.92     |
+| [Word2vec](https://arxiv.org/abs/1310.4546)  | [200](https://github.com/Kyubyong/wordvectors)       |   29.75 ± 0.28    | **72.59** |   16.94   |   17.16   |  **78.74**   |
+| [GloVe](https://nlp.stanford.edu/projects/glove/)     | [100](https://ratsgo.github.io/embedding)       |   30.93 ± 0.19    |   71.91   |   17.65   |   18.93   |    78.26     |
+| [fastText](https://arxiv.org/abs/1607.04606)  | [200](https://github.com/Kyubyong/wordvectors)       | **30.94 ± 0.09**  |   72.48   | **17.74** | **18.96** |    77.92     |
+| [BERT](https://arxiv.org/abs/1810.04805)      | [768](https://github.com/google-research/bert)       | 30.56 ± 0.12 |   69.28   |   17.48   |   18.65   |    78.28     |
 
 
 This repository is based on and inspired by @hengyuan-hu's [work](https://github.com/hengyuan-hu/bottom-up-attention-vqa). We sincerely thank for their sharing of the codes.
@@ -37,7 +37,7 @@ bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/me
 
 ### KVQA Dataset
 
-You can download the KVQA dataset via [this link](https://drive.google.com/drive/folders/1hqnCxlWq5JAxnj_wsXjteH0UFhS7RMHW?usp=sharing). Please be aware that this is licensed via `Korean VQA License`.
+You can download the KVQA dataset via [this link](https://github.com/SKTBrain/KVQA). Please be aware that this is licensed via `Korean VQA License`.
 
 ### Preprocessing
 
@@ -49,7 +49,9 @@ In addition to this, the pretrained Korean word vectors, [Word2vec](https://gith
 1. Place the downloaded files from [`KVQA Dataset`](#kvqa-dataset) as follows:
 ```bash
 data
-├── KVQA_annotations.json
+├── KVQA_annotations_train.json
+├── KVQA_annotations_val.json
+├── KVQA_annotations_test.json
 └── features
     ├── KVQA_resnet101_faster_rcnn_genome.tsv
     └── VizWiz_resnet101_faster_rcnn_genome.tsv
