@@ -26,7 +26,6 @@ def parse_args():
     parser.add_argument('--q_emb', type=str, default='fasttext-pkb', choices=dictionary_dict.keys())
     parser.add_argument('--op', type=str, default='')
     parser.add_argument('--gamma', type=int, default=8, help='glimpse')
-    parser.add_argument('--use_both', action='store_true', help='use both train/val datasets to train?')
     parser.add_argument('--finetune_q', action='store_true', help='finetune question embedding?')
     parser.add_argument('--on_do_q', action='store_true', help='turn on dropout of question embedding?')
     parser.add_argument('--input', type=str, default=None)
@@ -87,9 +86,5 @@ if __name__ == '__main__':
     val_score, bound, train_n_type, val_n_type, train_type_score, val_type_score = \
         train(model, train_loader, eval_loader, args.epochs, os.path.join(args.output), optim, epoch, logger)
 
-    logger.write('\nMean val upper bound: {}'.format(bound))
-    logger.write('\nMean val score: {}'.format(val_score))
-    logger.write('\nAnswer type: '+', '.join(train_dset.idx2type))
-    logger.write('\n'+'Number of examples for each type on train: {}'.format(train_n_type))
-    logger.write('\n'+'Number of examples for each type on val: {}'.format(val_n_type))
-    logger.write('\n'+'Mean score for each type on val: {}'.format(val_type_score))
+    logger.write('\nVal upper bound: {}'.format(bound))
+    logger.write('\nVal score: {}'.format(val_score))
