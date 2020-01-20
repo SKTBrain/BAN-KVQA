@@ -37,7 +37,7 @@ bash <(curl -s https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/me
 
 ### KVQA Dataset
 
-You can download the KVQA dataset via [this link](https://github.com/SKTBrain/KVQA). Please be aware that this is licensed via `Korean VQA License`.
+You can download the KVQA dataset via [this link](https://drive.google.com/drive/folders/1IQazOJtNTBql51woveN4zb6NplxH7eVl?usp=sharing). Please be aware that this is licensed via `Korean VQA License`.
 
 ### Preprocessing
 
